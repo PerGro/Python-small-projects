@@ -234,8 +234,6 @@ class FindFunction(Frame):  # 快速查找模块
                     self.frame_file_compare_config_entry3_int.set(str(count))
                 count += 1
 
-
-
     def run(self):
         self.frame_result_text.config(state=tk.NORMAL)
         self.frame_result_text.delete('1.0', tk.END)
@@ -265,7 +263,8 @@ class FindFunction(Frame):  # 快速查找模块
 
     def custom(self):
         class ChooseWindow:
-            def __init__(self):
+            def __init__(self, windows):
+                self.windows = windows
                 self.root = tk.Tk()
                 self.root.minsize(width=400, height=150)
                 self.root.maxsize(width=400, height=150)
@@ -309,33 +308,33 @@ class FindFunction(Frame):  # 快速查找模块
                 self.frame_file_custom_name_string = self.name_entry.get()
                 self.frame_file_custom_id_string = self.id_entry.get()
                 self.frame_file_custom_phone_string = self.phone_entry.get()
+                self.windows.frame_file_custom_name_string.set(self.frame_file_custom_name_string)
+                self.windows.frame_file_custom_id_string.set(self.frame_file_custom_id_string)
+                self.windows.frame_file_custom_phone_string.set(self.frame_file_custom_phone_string)
+                file = pd.read_excel(self.windows.file_compare, header=None)
+                length = 0
+                index_list = []
+                try:
+                    while True:
+                        file.iloc[0, length]
+                        index_list.append(file.iloc[0, length])
+                        length += 1
+                except IndexError:
+                    count = 1
+                    for index in index_list:
+                        if index == self.windows.frame_file_custom_name_string.get():
+                            self.windows.frame_file_compare_config_entry1_int.set(str(count))
+                        elif index == self.windows.frame_file_custom_id_string.get():
+                            self.windows.frame_file_compare_config_entry2_int.set(str(count))
+                        elif index == self.windows.frame_file_custom_phone_string.get():
+                            self.windows.frame_file_compare_config_entry3_int.set(str(count))
+                        count += 1
                 self.root.destroy()
 
             def quit(self):
                 self.root.destroy()
 
-        c = ChooseWindow()
-        self.frame_file_custom_name_string.set(c.frame_file_custom_name_string)
-        self.frame_file_custom_id_string.set(c.frame_file_custom_id_string)
-        self.frame_file_custom_phone_string.set(c.frame_file_custom_phone_string)
-        file = pd.read_excel(self.file_compare, header=None)
-        length = 0
-        index_list = []
-        try:
-            while True:
-                file.iloc[0, length]
-                index_list.append(file.iloc[0, length])
-                length += 1
-        except IndexError:
-            count = 1
-            for index in index_list:
-                if index == self.frame_file_custom_name_string.get():
-                    self.frame_file_compare_config_entry1_int.set(str(count))
-                elif index == self.frame_file_custom_id_string.get():
-                    self.frame_file_compare_config_entry2_int.set(str(count))
-                elif index == self.frame_file_custom_phone_string.get():
-                    self.frame_file_compare_config_entry3_int.set(str(count))
-                count += 1
+        c = ChooseWindow(self)
 
 '''
 此为查找的主程序
