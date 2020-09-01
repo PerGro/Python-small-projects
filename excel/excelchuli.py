@@ -263,7 +263,10 @@ class FindFunction(Frame):  # 快速查找模块
 
     def custom(self):
         class ChooseWindow:
-            def __init__(self, windows):
+            def __init__(self, windows, n1, n2, n3):
+                self.name = n1
+                self.id = n2
+                self.phone = n3
                 self.windows = windows
                 self.root = tk.Tk()
                 self.root.minsize(width=400, height=150)
@@ -290,19 +293,22 @@ class FindFunction(Frame):  # 快速查找模块
                 self.button2.place(x=220, y=110)
                 self.name_entry = tk.Entry(self.root, width=8, textvariable=self.name_string)
                 self.name_entry.place(x=70, y=50)
+                self.name_entry.insert(0, self.name_string.get())
                 self.id_entry = tk.Entry(self.root, width=8, textvariable=self.id_string)
                 self.id_entry.place(x=170, y=50)
+                self.id_entry.insert(0, self.id_string.get())
                 self.phone_entry = tk.Entry(self.root, width=8, textvariable=self.phone_string)
                 self.phone_entry.place(x=270, y=50)
+                self.phone_entry.insert(0, self.phone_string.get())
                 self.loop()
 
             def loop(self):
                 self.root.mainloop()
 
             def set_up(self):
-                self.name_string.set('姓名')
-                self.id_string.set('学号')
-                self.phone_string.set('电话号码')
+                self.name_string.set(self.name)
+                self.id_string.set(self.id)
+                self.phone_string.set(self.phone)
 
             def sure(self):
                 self.frame_file_custom_name_string = self.name_entry.get()
@@ -334,7 +340,7 @@ class FindFunction(Frame):  # 快速查找模块
             def quit(self):
                 self.root.destroy()
 
-        c = ChooseWindow(self)
+        c = ChooseWindow(self, self.frame_file_custom_name_string.get(), self.frame_file_custom_id_string.get(), self.frame_file_custom_phone_string.get())
 
 '''
 此为查找的主程序
