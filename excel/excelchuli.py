@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import filedialog
 import os
 from tkinter.scrolledtext import ScrolledText
+from tkinter.messagebox import showerror
 
 
 class Frame:
@@ -212,9 +213,12 @@ class FindFunction(Frame):  # 快速查找模块
         self.frame_file_choose_orgin_config_sheet_entry_string.set('Sheet1')
 
     def cat_excel2(self):
-        self.file_compare = filedialog.askopenfilename()
+        self.file_compare = filedialog.askopenfilename ()
         self.frame_file_choose_compare_entry_string.set(self.file_compare)
-        file = pd.read_excel(self.file_compare, header=None)
+        try:
+            file = pd.read_excel(self.file_compare, header=None)
+        except FileNotFoundError:
+            return 0
         length = 0
         index_list = []
         try:
@@ -234,23 +238,28 @@ class FindFunction(Frame):  # 快速查找模块
                     self.frame_file_compare_config_entry3_int.set(str(count))
                 count += 1
 
+
+
     def run(self):
         self.frame_result_text.config(state=tk.NORMAL)
         self.frame_result_text.delete('1.0', tk.END)
         # 所有需要输入的数字均为真实数字，无需再考虑下标问题
-        FindGuiSun(self,
-                   self.frame_file_choose_compare_entry.get(),
-                   int(self.frame_file_compare_config_entry1.get()) - 1,
-                   int(self.frame_file_compare_config_entry2.get()) - 1,
-                   int(self.frame_file_compare_config_entry3.get()) - 1,
-                   int(self.frame_file_orgin_config_entry.get()),
-                   int(self.frame_file_orgin_config_entry2.get()),
-                   self.frame_file_choose_orgin_entry.get(),
-                   self.frame_file_choose_orgin_config_sheet_entry.get(),
-                   name=True,
-                   id=True,
-                   phone=True
-                   )
+        try:
+            FindGuiSun(self,
+                       self.frame_file_choose_compare_entry.get(),
+                       int(self.frame_file_compare_config_entry1.get()) - 1,
+                       int(self.frame_file_compare_config_entry2.get()) - 1,
+                       int(self.frame_file_compare_config_entry3.get()) - 1,
+                       int(self.frame_file_orgin_config_entry.get()),
+                       int(self.frame_file_orgin_config_entry2.get()),
+                       self.frame_file_choose_orgin_entry.get(),
+                       self.frame_file_choose_orgin_config_sheet_entry.get(),
+                       name=True,
+                       id=True,
+                       phone=True
+                       )
+        except ValueError:
+            showerror(title='用这个程序还能出错，不会吧，不会吧', message='看看文件有没有加载好')
         self.frame_result_text.config(state=tk.DISABLED)
 
     def return_to_menu(self):
@@ -263,10 +272,7 @@ class FindFunction(Frame):  # 快速查找模块
 
     def custom(self):
         class ChooseWindow:
-            def __init__(self, windows, n1, n2, n3):
-                self.name = n1
-                self.id = n2
-                self.phone = n3
+            def __init__(self, windows, name, id, phone):
                 self.windows = windows
                 self.root = tk.Tk()
                 self.root.minsize(width=400, height=150)
@@ -292,23 +298,23 @@ class FindFunction(Frame):  # 快速查找模块
                 self.button2 = tk.Button(self.root, text='取消', command=self.quit)
                 self.button2.place(x=220, y=110)
                 self.name_entry = tk.Entry(self.root, width=8, textvariable=self.name_string)
+                self.name_entry.insert(0, name)
                 self.name_entry.place(x=70, y=50)
-                self.name_entry.insert(0, self.name_string.get())
                 self.id_entry = tk.Entry(self.root, width=8, textvariable=self.id_string)
+                self.id_entry.insert(0, id)
                 self.id_entry.place(x=170, y=50)
-                self.id_entry.insert(0, self.id_string.get())
                 self.phone_entry = tk.Entry(self.root, width=8, textvariable=self.phone_string)
+                self.phone_entry.insert(0, phone)
                 self.phone_entry.place(x=270, y=50)
-                self.phone_entry.insert(0, self.phone_string.get())
                 self.loop()
 
             def loop(self):
                 self.root.mainloop()
 
             def set_up(self):
-                self.name_string.set(self.name)
-                self.id_string.set(self.id)
-                self.phone_string.set(self.phone)
+                self.name_string.set('姓名')
+                self.id_string.set('学号')
+                self.phone_string.set('电话号码')
 
             def sure(self):
                 self.frame_file_custom_name_string = self.name_entry.get()
@@ -317,10 +323,10 @@ class FindFunction(Frame):  # 快速查找模块
                 self.windows.frame_file_custom_name_string.set(self.frame_file_custom_name_string)
                 self.windows.frame_file_custom_id_string.set(self.frame_file_custom_id_string)
                 self.windows.frame_file_custom_phone_string.set(self.frame_file_custom_phone_string)
-                file = pd.read_excel(self.windows.file_compare, header=None)
                 length = 0
                 index_list = []
                 try:
+                    file = pd.read_excel(self.windows.file_compare, header=None)
                     while True:
                         file.iloc[0, length]
                         index_list.append(file.iloc[0, length])
@@ -335,12 +341,18 @@ class FindFunction(Frame):  # 快速查找模块
                         elif index == self.windows.frame_file_custom_phone_string.get():
                             self.windows.frame_file_compare_config_entry3_int.set(str(count))
                         count += 1
+                except FileNotFoundError:
+                    showerror(title='用这个程序还能出错，不会吧，不会吧', message='看看文件有没有加载好')
+                except AttributeError:
+                    showerror(title='用这个程序还能出错，不会吧，不会吧', message='看看文件有没有加载好')
                 self.root.destroy()
 
             def quit(self):
                 self.root.destroy()
 
         c = ChooseWindow(self, self.frame_file_custom_name_string.get(), self.frame_file_custom_id_string.get(), self.frame_file_custom_phone_string.get())
+
+
 
 '''
 此为查找的主程序
