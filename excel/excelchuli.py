@@ -5,9 +5,14 @@ import os
 from tkinter.scrolledtext import ScrolledText
 from tkinter.messagebox import showerror
 
+"""本脚本所有输入数字均为真实数字，无需考虑因下标带来的差异"""
+
 
 class Frame:
     def __init__(self):
+        """
+        框架初始化，变量初始化，Entry初始化，Label初始化，Button初始化，item初始化，loop()
+        """
         self.root = tk.Tk()
         self.frame_init()
         self.var_init()
@@ -208,11 +213,13 @@ class FindFunction(Frame):  # 快速查找模块
         self.root.destroy()
 
     def cat_excel1(self):
+        """控制目标文件的输入读取"""
         self.file_orgin = filedialog.askopenfilename()
         self.frame_file_choose_orgin_entry_string.set(self.file_orgin)
         self.frame_file_choose_orgin_config_sheet_entry_string.set('Sheet1')
 
     def cat_excel2(self):
+        """控制花名册的输入读取"""
         self.file_compare = filedialog.askopenfilename ()
         self.frame_file_choose_compare_entry_string.set(self.file_compare)
         try:
@@ -229,7 +236,6 @@ class FindFunction(Frame):  # 快速查找模块
         except IndexError:
             count = 1
             for index in index_list:
-                # 可以在这里修改对应的自动查找关键词
                 if index == self.frame_file_custom_name_string.get():
                     self.frame_file_compare_config_entry1_int.set(str(count))
                 elif index == self.frame_file_custom_id_string.get():
@@ -241,6 +247,7 @@ class FindFunction(Frame):  # 快速查找模块
 
 
     def run(self):
+        """点击“查询”后会执行的方法"""
         self.frame_result_text.config(state=tk.NORMAL)
         self.frame_result_text.delete('1.0', tk.END)
         # 所有需要输入的数字均为真实数字，无需再考虑下标问题
@@ -259,20 +266,33 @@ class FindFunction(Frame):  # 快速查找模块
                        phone=True
                        )
         except ValueError:
-            showerror(title='用这个程序还能出错，不会吧，不会吧', message='看看文件有没有加载好')
+            #   阴阳对话框
+            showerror(title='用这个程序还能出错，不会吧，不会吧', message='看看文件有没有加载好，以及检查一下文件的目录有没有问题，注意如果是手动输入，请把所有\\改为/')
         self.frame_result_text.config(state=tk.DISABLED)
 
     def return_to_menu(self):
+        """返回主菜单的方法"""
         self.root.destroy()
         MainMenu()
 
     def to_other(self):
+        """
+        跳转到其他工作区的方法，2020/9/2：目前只完善了龟孙查找器
+        """
         self.root.destroy()
         s = SmallWindow()
 
     def custom(self):
         class ChooseWindow:
+            """为控制“自定义”组件的windows"""
             def __init__(self, windows, name, id, phone):
+                """
+                大杂烩
+                :param windows: 父窗口
+                :param name: 父窗口的frame_file_custom_name_string
+                :param id: 父窗口的frame_file_custom_id_string
+                :param phone: 父窗口的frame_file_custom_phone_string
+                """
                 self.windows = windows
                 self.root = tk.Tk()
                 self.root.minsize(width=400, height=150)
@@ -312,6 +332,7 @@ class FindFunction(Frame):  # 快速查找模块
                 self.root.mainloop()
 
             def set_up(self):
+                # 默认为这些，可通过更改来改变默认参数
                 self.name_string.set('姓名')
                 self.id_string.set('学号')
                 self.phone_string.set('电话号码')
@@ -342,9 +363,9 @@ class FindFunction(Frame):  # 快速查找模块
                             self.windows.frame_file_compare_config_entry3_int.set(str(count))
                         count += 1
                 except FileNotFoundError:
-                    showerror(title='用这个程序还能出错，不会吧，不会吧', message='看看文件有没有加载好')
+                    showerror(title='用这个程序还能出错，不会吧，不会吧', message='看看文件有没有加载好，以及检查一下文件的目录有没有问题，注意如果是手动输入，请把所有\\改为/')
                 except AttributeError:
-                    showerror(title='用这个程序还能出错，不会吧，不会吧', message='看看文件有没有加载好')
+                    showerror(title='用这个程序还能出错，不会吧，不会吧', message='看看文件有没有加载好，以及检查一下文件的目录有没有问题，注意如果是手动输入，请把所有\\改为/')
                 self.root.destroy()
 
             def quit(self):
