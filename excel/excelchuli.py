@@ -221,11 +221,12 @@ class FindFunction(Frame):  # 快速查找模块
     def cat_excel2(self):
         """控制花名册的输入读取"""
         self.file_compare = filedialog.askopenfilename ()
-        self.frame_file_choose_compare_entry_string.set(self.file_compare)
         try:
             file = pd.read_excel(self.file_compare, header=None)
         except FileNotFoundError:
             return 0
+        # 保证在不选择任何文件情况下仍不会报错
+        self.frame_file_choose_compare_entry_string.set(self.file_compare)
         length = 0
         index_list = []
         try:
@@ -363,6 +364,7 @@ class FindFunction(Frame):  # 快速查找模块
                             self.windows.frame_file_compare_config_entry3_int.set(str(count))
                         count += 1
                 except FileNotFoundError:
+                    """此错误会在当自定义筛选找不到对应的文件时被调用"""
                     showerror(title='用这个程序还能出错，不会吧，不会吧', message='看看文件有没有加载好，以及检查一下文件的目录有没有问题，注意如果是手动输入，请把所有\\改为/')
                 except AttributeError:
                     showerror(title='用这个程序还能出错，不会吧，不会吧', message='看看文件有没有加载好，以及检查一下文件的目录有没有问题，注意如果是手动输入，请把所有\\改为/')
