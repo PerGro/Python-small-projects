@@ -84,7 +84,7 @@ class MainMenu(Frame):
 
     def button_create(self):
         self.button1 = tk.Button(self.root, text='查找模式', width=25, height=5, command=self.to_find)
-        self.button2 = tk.Button(self.root, text='批处理模式', width=25, height=5)
+        self.button2 = tk.Button(self.root, text='筛选模式', width=25, height=5, command=self.filter)
 
     def button_register(self):
         self.button1.place(x=65, y=310)
@@ -96,6 +96,10 @@ class MainMenu(Frame):
     def to_find(self):
         self.root.destroy()
         FindFunction()
+
+    def filter(self):
+        self.root.destroy()
+        Filter()
 
 
 class FindFunction(Frame):  # 快速查找模块
@@ -399,7 +403,7 @@ class FindGuiSun:
         self.textbox = textbox
         self.file = pd.read_excel(file)
         length = self.getlength(self.file, name_col)
-        name_list = self.file.iloc[:length, name_col]  # 这里要改
+        name_list = self.file.iloc[:length, name_col]
         id_list = self.file.iloc[:length, id_col]
         phone_number_list = self.file.iloc[:length, phone_col]
         id_and_phone = []
@@ -494,7 +498,7 @@ class SmallWindow:
 
     def main_menu(self):
         button1 = tk.Button(self.root, text='龟孙查找器', command=self.return_back1)
-        button2 = tk.Button(self.root, text='批处理器', command=self.return_back2)
+        button2 = tk.Button(self.root, text='高级筛选器', command=self.return_back2)
 
         button1.pack(fill=tk.X)
         button2.pack(fill=tk.X)
@@ -507,7 +511,40 @@ class SmallWindow:
 
     def return_back2(self):
         self.root.destroy()
-        PiChuLi()
+        Filter()
+
+"""以下为筛选器"""
+
+class Filter(Frame):
+    def __init__(self):
+        super().__init__()
+
+    def frame_init(self):
+        self.root.title('高级筛选器')
+        self.root.geometry('825x720')
+        self.root.minsize(width=825, height=720)
+        self.root.maxsize(width=825, height=720)
+
+        self.file_choose = tk.Frame(self.root, width=825, height=50)
+        self.file_filter = tk.Frame(self.root, width=825, height=110)
+        self.file_re = tk.Frame(self.root, width=825, height=110)
+        self.file_result = tk.Frame(self.root, width=825, height=400)
+        self.file_end = tk.Frame(self.root, width=825, height=50)
+
+        self.file_choose.pack()
+        self.file_filter.pack()
+        self.file_re.pack()
+        self.file_result.pack()
+        self.file_end.pack()
+
+        # self.show_frames()  # 用于显示各frame的位置
+
+    def show_frames(self):
+        self.file_choose.config(bg='blue')
+        self.file_filter.config(bg='green')
+        self.file_re.config(bg='pink')
+        self.file_result.config(bg='black')
+        self.file_end.config(bg='gray')
 
 
 if __name__ == '__main__':
