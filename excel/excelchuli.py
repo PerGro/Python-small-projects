@@ -4,9 +4,18 @@ from tkinter import filedialog
 import os
 from tkinter.scrolledtext import ScrolledText
 from tkinter.messagebox import showerror
+import re
 
 """本脚本所有输入数字均为真实数字，无需考虑因下标带来的差异"""
 
+LONG_ENTRY = 80
+MID_ENTRY_POS = 100
+BUTTON_RIGHT_MID_LONG_ENTRY = 680
+SHORT_ENTRY = 10
+RUN_BUTTON = 350
+QUIT_BUTTON = 450
+RETURN_BUTTON = 10
+TO_OTHER = 100
 
 class Frame:
     def __init__(self):
@@ -70,9 +79,24 @@ class Frame:
     def loop(self):
         self.root.mainloop()
 
+    def return_to_menu(self):
+        """用于返回主菜单"""
+        self.root.destroy()
+        MainMenu()
+
+    def to_other(self):
+        """用于调出选项菜单"""
+        self.root.destroy()
+        SmallWindow()
+
+    def quit(self):
+        """用于退出"""
+        self.root.destroy()
+
 
 class MainMenu(Frame):
     """主界面"""
+
     def __init__(self):
         super(MainMenu, self).__init__()
 
@@ -104,6 +128,7 @@ class MainMenu(Frame):
 
 class FindFunction(Frame):  # 快速查找模块
     """命名规则：self.frame_name_widgetfunction_widgetname(_datatype)"""
+
     def __init__(self):
         super(FindFunction, self).__init__()
 
@@ -164,23 +189,22 @@ class FindFunction(Frame):  # 快速查找模块
         self.frame_result_text = ScrolledText(self.frame_result, height=28, width=100, undo=True, state=tk.DISABLED)
         s = tk.Text()
 
-
     def txt_register(self):
         self.frame_file_choose_orgin_entry.place(x=100, y=5)
         self.frame_file_choose_compare_entry.place(x=100, y=100)
         self.frame_file_choose_orgin_config_sheet_entry.place(x=120, y=50)
         self.frame_file_orgin_config_entry.place(x=650, y=50)
         self.frame_file_orgin_config_entry2.place(x=675, y=50)
-        self.frame_file_compare_config_entry1.place(x=620, y=150)   # name
-        self.frame_file_compare_config_entry2.place(x=645, y=150)   # id
-        self.frame_file_compare_config_entry3.place(x=670, y=150)   # phone number
+        self.frame_file_compare_config_entry1.place(x=620, y=150)  # name
+        self.frame_file_compare_config_entry2.place(x=645, y=150)  # id
+        self.frame_file_compare_config_entry3.place(x=670, y=150)  # phone number
         self.frame_result_text.place(x=50, y=10)
 
     def label_create(self):
         self.frame_head_title = tk.Label(self.frame_head, text='快速查找器', font=('黑体', 20, 'bold'))
         self.frame_file_choose_orgin = tk.Label(self.frame_file, text='选择目标文件')  # 要对比的文件
         self.frame_file_choose_orgin_config_sheet = tk.Label(self.frame_file, text='请输入工作薄名称')
-        self.frame_file_choose_compare = tk.Label(self.frame_file, text='选择花名册')   # 花名册
+        self.frame_file_choose_compare = tk.Label(self.frame_file, text='选择花名册')  # 花名册
         self.frame_file_orgin_config = tk.Label(self.frame_file, text='姓名读取行与列')
         self.frame_file_compare_config = tk.Label(self.frame_file, text='姓名、id、电话号码读取列')
 
@@ -224,7 +248,7 @@ class FindFunction(Frame):  # 快速查找模块
 
     def cat_excel2(self):
         """控制花名册的输入读取"""
-        self.file_compare = filedialog.askopenfilename ()
+        self.file_compare = filedialog.askopenfilename()
         try:
             file = pd.read_excel(self.file_compare, header=None)
         except FileNotFoundError:
@@ -248,8 +272,6 @@ class FindFunction(Frame):  # 快速查找模块
                 elif index == self.frame_file_custom_phone_string.get():
                     self.frame_file_compare_config_entry3_int.set(str(count))
                 count += 1
-
-
 
     def run(self):
         """点击“查询”后会执行的方法"""
@@ -285,11 +307,12 @@ class FindFunction(Frame):  # 快速查找模块
         跳转到其他工作区的方法，2020/9/2：目前只完善了龟孙查找器
         """
         self.root.destroy()
-        s = SmallWindow()
+        SmallWindow()
 
     def custom(self):
         class ChooseWindow:
             """为控制“自定义”组件的windows"""
+
             def __init__(self, windows, name, id, phone):
                 """
                 大杂烩
@@ -380,7 +403,6 @@ class FindFunction(Frame):  # 快速查找模块
         c = ChooseWindow(self, self.frame_file_custom_name_string.get(), self.frame_file_custom_id_string.get(), self.frame_file_custom_phone_string.get())
 
 
-
 '''
 此为查找的主程序
 '''
@@ -433,7 +455,6 @@ class FindGuiSun:
         except IndexError:
             return length
 
-
     def __print_info(self, info=None, excel_info=None, name=False, ids=False, phone_number=False):
         self.textbox.frame_result_text.insert(tk.END, "查找excel：" + excel_info[0], '查找列位置：' + str(excel_info[1]), '查找行位置：' + str(excel_info[2]) + '\n')
         self.textbox.frame_result_text.insert(tk.END, '花名册中有 ' + str(self.length) + '\n')
@@ -457,7 +478,7 @@ class FindGuiSun:
         if self.find_col:
             names = find_file.iloc[:name_length, self.find_col - 1]
         if self.find_row:
-            names = find_file.iloc[self.find_row - 1 : name_length + self.find_row - 2, self.find_col - 1]
+            names = find_file.iloc[self.find_row - 1: name_length + self.find_row - 2, self.find_col - 1]
         if self.find_col is None and self.find_row is None:
             return 0
         names = list(names)
@@ -513,11 +534,15 @@ class SmallWindow:
         self.root.destroy()
         Filter()
 
+
 """以下为筛选器"""
+
 
 class Filter(Frame):
     def __init__(self):
         super().__init__()
+        self.file_path = None
+        self.file = None
 
     def frame_init(self):
         self.root.title('高级筛选器')
@@ -525,15 +550,15 @@ class Filter(Frame):
         self.root.minsize(width=825, height=720)
         self.root.maxsize(width=825, height=720)
 
-        self.file_choose = tk.Frame(self.root, width=825, height=50)
-        self.file_filter = tk.Frame(self.root, width=825, height=110)
+        self.file_choose = tk.Frame(self.root, width=825, height=80)
+        self.file_filter = tk.Frame(self.root, width=825, height=100)
         self.file_re = tk.Frame(self.root, width=825, height=110)
-        self.file_result = tk.Frame(self.root, width=825, height=400)
+        self.file_result = tk.Frame(self.root, width=825, height=380)
         self.file_end = tk.Frame(self.root, width=825, height=50)
 
         self.file_choose.pack()
-        self.file_filter.pack()
         self.file_re.pack()
+        self.file_filter.pack()
         self.file_result.pack()
         self.file_end.pack()
 
@@ -541,10 +566,93 @@ class Filter(Frame):
 
     def show_frames(self):
         self.file_choose.config(bg='blue')
-        self.file_filter.config(bg='green')
-        self.file_re.config(bg='pink')
+        self.file_re.config(bg='green')
+        self.file_filter.config(bg='pink')
         self.file_result.config(bg='black')
         self.file_end.config(bg='gray')
+
+    def var_init(self):
+        self.file_choose_entry_string = tk.StringVar()
+        self.file_choose_sheet_entry_string = tk.StringVar()
+        self.file_re_relist_entry_string = tk.StringVar()
+        self.file_re_choose_pos_row_entry_int = tk.IntVar()
+        self.file_re_choose_pos_col_entry_int = tk.IntVar()
+        self.file_filter_quick_filter_entry_string = tk.StringVar()
+        self.file_filter_quick_filter_row_entry_int = tk.IntVar()
+        self.file_filter_quick_filter_col_entry_int = tk.IntVar()
+
+    def label_create(self):
+        self.file_choose_label = tk.Label(self.file_choose, text='选择文件:')
+        self.file_choose_sheet_label = tk.Label(self.file_choose, text='选择工作薄:')
+        self.file_re_relabel_label = tk.Label(self.file_re, text='请输入正则表达式:')
+        self.file_re_choose_pos_label = tk.Label(self.file_re, text='请输入开始筛选的行与列:')
+        self.file_filter_quick_filter_label = tk.Label(self.file_filter, text='快速筛选:')
+        self.file_filter_quick_filter_col_label = tk.Label(self.file_filter, text='请输入筛选列:')
+
+    def txt_create(self):
+        self.file_choose_entry = tk.Entry(self.file_choose, width=LONG_ENTRY, textvariable=self.file_choose_entry_string)
+        self.file_choose_sheet_entry = tk.Entry(self.file_choose, width=SHORT_ENTRY, textvariable=self.file_choose_sheet_entry_string)
+        self.file_re_relist_entry = tk.Entry(self.file_re, width=LONG_ENTRY, textvariable=self.file_re_relist_entry_string)
+        self.file_re_choose_pos_row_entry = tk.Entry(self.file_re, width=3, textvariable=self.file_re_choose_pos_row_entry_int)
+        self.file_re_choose_pos_col_entry = tk.Entry(self.file_re, width=3, textvariable=self.file_re_choose_pos_col_entry_int)
+        self.file_filter_quick_filter_entry = tk.Entry(self.file_filter, width=LONG_ENTRY, textvariable=self.file_filter_quick_filter_entry_string)
+        self.file_filter_quick_filter_row_entry = tk.Entry(self.file_filter, width=3, textvariable=self.file_filter_quick_filter_row_entry_int)
+        self.file_filter_quick_filter_col_entry = tk.Entry(self.file_filter, width=3, textvariable=self.file_filter_quick_filter_col_entry_int)
+        self.file_result_entry = ScrolledText(self.file_result, height=28, width=100, undo=True, state=tk.DISABLED)
+
+    def button_create(self):
+        self.file_choose_button = tk.Button(self.file_choose, text='浏览', command=self.read_file)
+        self.file_choose_reflash_button = tk.Button(self.file_choose, text='重新加载', command=self.reset_file)
+        self.file_re_filter_button = tk.Button(self.file_re, text='筛选')
+        self.file_re_filter_clear_button = tk.Button(self.file_re, text='清空', command=self.clear)
+        self.file_filter_quick_filter_delete_button = tk.Button(self.file_filter, text='剔除')
+        self.file_filter_quick_filter_get_button = tk.Button(self.file_filter, text='提取')
+        self.file_end_run_button = tk.Button(self.file_end, text='运行', font=('黑体', 20, 'bold'))
+        self.file_end_quit_button = tk.Button(self.file_end, text='退出', command=self.quit, font=('黑体', 20, 'bold'))
+        self.file_end_button_return = tk.Button(self.file_end, text='返回主页面', font=('黑体', 10, 'bold'), command=self.return_to_menu)
+        self.file_end_button_choose_other = tk.Button(self.file_end, text='进入其他功能区', font=('黑体', 10, 'bold'), command=self.to_other)
+
+    def label_register(self):
+        self.file_choose_label.place(x=50, y=5)
+        self.file_choose_sheet_label.place(x=50, y=50)
+        self.file_re_relabel_label.place(x=30, y=5)
+        self.file_re_choose_pos_label.place(x=50, y=60)
+        self.file_filter_quick_filter_label.place(x=50, y=5)
+        self.file_filter_quick_filter_col_label.place(x=50, y=60)
+
+    def txt_register(self):
+        self.file_choose_entry.place(x=MID_ENTRY_POS+10, y=10)
+        self.file_choose_sheet_entry.place(x=130, y=55)
+        self.file_re_relist_entry.place(x=MID_ENTRY_POS, y=30)
+        self.file_re_choose_pos_row_entry.place(x=200, y=60)
+        self.file_re_choose_pos_col_entry.place(x=230, y=60)
+        self.file_filter_quick_filter_entry.place(x=MID_ENTRY_POS, y=30)
+        self.file_filter_quick_filter_row_entry.place(x=150, y=60)
+        self.file_filter_quick_filter_col_entry.place(x=180, y=60)
+        self.file_result_entry.place(x=50)
+
+    def button_register(self):
+        self.file_choose_button.place(x=BUTTON_RIGHT_MID_LONG_ENTRY, y=10)
+        self.file_choose_reflash_button.place(x=BUTTON_RIGHT_MID_LONG_ENTRY+40, y=10)
+        self.file_re_filter_button.place(x=BUTTON_RIGHT_MID_LONG_ENTRY, y=30)
+        self.file_re_filter_clear_button.place(x=BUTTON_RIGHT_MID_LONG_ENTRY+40, y=30)
+        self.file_filter_quick_filter_delete_button.place(x=BUTTON_RIGHT_MID_LONG_ENTRY, y=30)
+        self.file_filter_quick_filter_get_button.place(x=BUTTON_RIGHT_MID_LONG_ENTRY+40, y=30)
+        self.file_end_run_button.place(x=RUN_BUTTON)
+        self.file_end_quit_button.place(x=QUIT_BUTTON)
+        self.file_end_button_choose_other.place(x=TO_OTHER, y=10)
+        self.file_end_button_return.place(x=RETURN_BUTTON, y=10)
+
+    def read_file(self):
+        self.file_path = filedialog.askopenfilename()
+        self.file_choose_entry_string.set(self.file_path)
+        self.file_choose_sheet_entry_string.set('Sheet1')
+
+    def reset_file(self):
+        self.file = pd.read_excel(self.file_path)
+
+    def clear(self):
+        self.file_re_relist_entry_string.set('')
 
 
 if __name__ == '__main__':
