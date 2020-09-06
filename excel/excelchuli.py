@@ -132,6 +132,7 @@ class FindFunction(Frame):  # 快速查找模块
 
     def __init__(self):
         super(FindFunction, self).__init__()
+        self.root.bind('<Return>', self.run)
 
     def frame_init(self):
         self.root.title('让我看看是哪个龟孙')
@@ -549,11 +550,25 @@ class SmallWindow:
 
 
 class Filter(Frame):
+    """
+    高级筛选器说明：
+    1.选择文件，并选择对应的sheet
+    2.输入正则表达式进行筛选或者使用快速筛选，在使用正则表达式进行筛选时输入正则表达式，并输入开始筛选的行列坐标（通常为需要筛选数据集的最左上的数据），
+    比如输入r, l，那么将会以在（r,l）单元格的数据为基准，向右检测所有列（或正则表达式所覆盖到的列），向下检测所有行（直到检测到空行为止，但要注意若（r+n, l）位置单元格为空，即使同行不为空程序仍会中止）。
+    3.输入的正则表达式以空格为间隔，每个“单独”的正则表达式代表对（r+i,l+n）位置的单元格进行筛选，若单元格内容不符合正则表达式则会在结果框里显示。
+    例如，输入的r=3, l=2，正则表达式为\b{10} \w{10} yes|Yes \b{3}\w{2}，则对(r, l)单元格进行\b{10}的判断，对(r, l+1)的单元格进行\w{10}的判断……依此类推，若正则表达式的长度超出列长度则会停止，
+    然后在(r+1, l)单元格继续进行\b{10}的判断。
+    4.输入完毕后点击“筛选”或者“运行”都可以运行程序，点击清空则会清空整个正则表达式填写框。
+    5.若使用的是快速筛选进行筛选，需先选择筛选行列，规则同上。
+    6.然后点击提取，将会提取当前列所有内容（去除重复项），若直接点击运行则会显示所有与目前选中相同单元格的信息，也可以通过“剔除”来将选中信息从已经提取的信息删除（并不会对源文件进行操作）。
+    7.可以通过敲击回车快速运行。
+    """
     def __init__(self):
         super().__init__()
         self.file_path = None
         self.file = None
         self.quick_filter_item = None
+        self.root.bind("<Return>", self.run)
 
     def frame_init(self):
         self.root.title('高级筛选器')
@@ -701,6 +716,7 @@ class Filter(Frame):
         self.file_choose_sheet_combobox.current(0)
 
     def reset_file(self):
+        """重新运行整个程序"""
         self.run()
 
     def clear(self):
@@ -729,7 +745,7 @@ class Filter(Frame):
         info = {}
         cats = self.file_filter_quick_filter_combobox_string.get()
         for i in range(rows):
-            if self.file.iloc[self.file_filter_quick_filter_row_entry_int.get() - 1 + i, self.file_filter_quick_filter_col_entry_int.get() - 1] == cats:
+            if str(self.file.iloc[self.file_filter_quick_filter_row_entry_int.get() - 1 + i, self.file_filter_quick_filter_col_entry_int.get() - 1]) == cats:
                 info[i + self.file_filter_quick_filter_row_entry_int.get()] = [self.file_filter_quick_filter_col_entry_int.get(), cats]
         return info
 
