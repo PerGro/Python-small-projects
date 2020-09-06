@@ -132,7 +132,6 @@ class FindFunction(Frame):  # 快速查找模块
 
     def __init__(self):
         super(FindFunction, self).__init__()
-        self.root.bind('<Return>', self.run)
 
     def frame_init(self):
         self.root.title('让我看看是哪个龟孙')
@@ -561,14 +560,13 @@ class Filter(Frame):
     4.输入完毕后点击“筛选”或者“运行”都可以运行程序，点击清空则会清空整个正则表达式填写框。
     5.若使用的是快速筛选进行筛选，需先选择筛选行列，规则同上。
     6.然后点击提取，将会提取当前列所有内容（去除重复项），若直接点击运行则会显示所有与目前选中相同单元格的信息，也可以通过“剔除”来将选中信息从已经提取的信息删除（并不会对源文件进行操作）。
-    7.可以通过敲击回车快速运行。
     """
     def __init__(self):
-        super().__init__()
         self.file_path = None
         self.file = None
         self.quick_filter_item = None
-        self.root.bind("<Return>", self.run)
+        super().__init__()
+
 
     def frame_init(self):
         self.root.title('高级筛选器')
