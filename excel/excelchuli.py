@@ -5,6 +5,7 @@ import os
 from tkinter.scrolledtext import ScrolledText
 from tkinter.messagebox import showerror
 import re
+from tkinter import ttk
 
 """本脚本所有输入数字均为真实数字，无需考虑因下标带来的差异"""
 
@@ -180,7 +181,7 @@ class FindFunction(Frame):  # 快速查找模块
     def txt_create(self):
         self.frame_file_choose_orgin_entry = tk.Entry(self.frame_file, textvariable=self.frame_file_choose_orgin_entry_string, width=80)
         self.frame_file_choose_compare_entry = tk.Entry(self.frame_file, textvariable=self.frame_file_choose_compare_entry_string, width=80)
-        self.frame_file_choose_orgin_config_sheet_entry = tk.Entry(self.frame_file, width=10, textvariable=self.frame_file_choose_orgin_config_sheet_entry_string)
+        # self.frame_file_choose_orgin_config_sheet_entry = tk.Entry(self.frame_file, width=10, textvariable=self.frame_file_choose_orgin_config_sheet_entry_string)
         self.frame_file_orgin_config_entry = tk.Entry(self.frame_file, width=3, textvariable=self.frame_file_orgin_config_entry_int)
         self.frame_file_orgin_config_entry2 = tk.Entry(self.frame_file, width=3, textvariable=self.frame_file_orgin_config_entry2_int)
         self.frame_file_compare_config_entry1 = tk.Entry(self.frame_file, width=3, textvariable=self.frame_file_compare_config_entry1_int)
@@ -192,7 +193,7 @@ class FindFunction(Frame):  # 快速查找模块
     def txt_register(self):
         self.frame_file_choose_orgin_entry.place(x=100, y=5)
         self.frame_file_choose_compare_entry.place(x=100, y=100)
-        self.frame_file_choose_orgin_config_sheet_entry.place(x=120, y=50)
+        # self.frame_file_choose_orgin_config_sheet_entry.place(x=120, y=50)
         self.frame_file_orgin_config_entry.place(x=650, y=50)
         self.frame_file_orgin_config_entry2.place(x=675, y=50)
         self.frame_file_compare_config_entry1.place(x=620, y=150)  # name
@@ -234,6 +235,12 @@ class FindFunction(Frame):  # 快速查找模块
         self.frame_end_button_choose_other.place(x=100, y=10)
         self.frame_file_custom.place(x=710, y=150)
 
+    def item_create(self):
+        self.sheet = ttk.Combobox(self.frame_file, width=SHORT_ENTRY, textvariable=self.frame_file_choose_orgin_config_sheet_entry_string)
+
+    def item_register(self):
+        self.sheet.place(x=120, y=50)
+
     def loop(self):
         self.root.mainloop()
 
@@ -244,6 +251,9 @@ class FindFunction(Frame):  # 快速查找模块
         """控制目标文件的输入读取"""
         self.file_orgin = filedialog.askopenfilename()
         self.frame_file_choose_orgin_entry_string.set(self.file_orgin)
+        temp = pd.ExcelFile(self.file_orgin)
+        self.sheet['value'] = temp.sheet_names
+        self.sheet.current(0)
         self.frame_file_choose_orgin_config_sheet_entry_string.set('Sheet1')
 
     def cat_excel2(self):
@@ -287,7 +297,7 @@ class FindFunction(Frame):  # 快速查找模块
                        int(self.frame_file_orgin_config_entry.get()),
                        int(self.frame_file_orgin_config_entry2.get()),
                        self.frame_file_choose_orgin_entry.get(),
-                       self.frame_file_choose_orgin_config_sheet_entry.get(),
+                       self.frame_file_choose_orgin_config_sheet_entry_string.get(),
                        name=True,
                        id=True,
                        phone=True
@@ -543,6 +553,7 @@ class Filter(Frame):
         super().__init__()
         self.file_path = None
         self.file = None
+        self.quick_filter_item = None
 
     def frame_init(self):
         self.root.title('高级筛选器')
@@ -580,6 +591,7 @@ class Filter(Frame):
         self.file_filter_quick_filter_entry_string = tk.StringVar()
         self.file_filter_quick_filter_row_entry_int = tk.IntVar()
         self.file_filter_quick_filter_col_entry_int = tk.IntVar()
+        self.file_filter_quick_filter_combobox_string = tk.StringVar()
 
     def label_create(self):
         self.file_choose_label = tk.Label(self.file_choose, text='选择文件:')
@@ -587,27 +599,31 @@ class Filter(Frame):
         self.file_re_relabel_label = tk.Label(self.file_re, text='请输入正则表达式:')
         self.file_re_choose_pos_label = tk.Label(self.file_re, text='请输入开始筛选的行与列:')
         self.file_filter_quick_filter_label = tk.Label(self.file_filter, text='快速筛选:')
-        self.file_filter_quick_filter_col_label = tk.Label(self.file_filter, text='请输入筛选列:')
+        self.file_filter_quick_filter_col_label = tk.Label(self.file_filter, text='请输入筛选行列:')
 
     def txt_create(self):
         self.file_choose_entry = tk.Entry(self.file_choose, width=LONG_ENTRY, textvariable=self.file_choose_entry_string)
-        self.file_choose_sheet_entry = tk.Entry(self.file_choose, width=SHORT_ENTRY, textvariable=self.file_choose_sheet_entry_string)
+        # self.file_choose_sheet_entry = tk.Entry(self.file_choose, width=SHORT_ENTRY, textvariable=self.file_choose_sheet_entry_string)
         self.file_re_relist_entry = tk.Entry(self.file_re, width=LONG_ENTRY, textvariable=self.file_re_relist_entry_string)
         self.file_re_choose_pos_row_entry = tk.Entry(self.file_re, width=3, textvariable=self.file_re_choose_pos_row_entry_int)
         self.file_re_choose_pos_col_entry = tk.Entry(self.file_re, width=3, textvariable=self.file_re_choose_pos_col_entry_int)
-        self.file_filter_quick_filter_entry = tk.Entry(self.file_filter, width=LONG_ENTRY, textvariable=self.file_filter_quick_filter_entry_string)
+        # self.file_filter_quick_filter_entry = tk.Entry(self.file_filter, width=LONG_ENTRY, textvariable=self.file_filter_quick_filter_entry_string)
         self.file_filter_quick_filter_row_entry = tk.Entry(self.file_filter, width=3, textvariable=self.file_filter_quick_filter_row_entry_int)
         self.file_filter_quick_filter_col_entry = tk.Entry(self.file_filter, width=3, textvariable=self.file_filter_quick_filter_col_entry_int)
         self.file_result_entry = ScrolledText(self.file_result, height=28, width=100, undo=True, state=tk.DISABLED)
 
+    def item_create(self):
+        self.file_choose_sheet_combobox = ttk.Combobox(self.file_choose, textvariable=self.file_choose_sheet_entry_string, width=SHORT_ENTRY)
+        self.file_filter_quick_filter_combobox = ttk.Combobox(self.file_filter, textvariable=self.file_filter_quick_filter_combobox_string, width=LONG_ENTRY-3)
+
     def button_create(self):
         self.file_choose_button = tk.Button(self.file_choose, text='浏览', command=self.read_file)
         self.file_choose_reflash_button = tk.Button(self.file_choose, text='重新加载', command=self.reset_file)
-        self.file_re_filter_button = tk.Button(self.file_re, text='筛选')
+        self.file_re_filter_button = tk.Button(self.file_re, text='筛选', command=self.run)
         self.file_re_filter_clear_button = tk.Button(self.file_re, text='清空', command=self.clear)
-        self.file_filter_quick_filter_delete_button = tk.Button(self.file_filter, text='剔除')
-        self.file_filter_quick_filter_get_button = tk.Button(self.file_filter, text='提取')
-        self.file_end_run_button = tk.Button(self.file_end, text='运行', font=('黑体', 20, 'bold'))
+        self.file_filter_quick_filter_delete_button = tk.Button(self.file_filter, text='剔除', command=self.remove)
+        self.file_filter_quick_filter_get_button = tk.Button(self.file_filter, text='提取', command=self.get_cols)
+        self.file_end_run_button = tk.Button(self.file_end, text='运行', font=('黑体', 20, 'bold'), command=self.run)
         self.file_end_quit_button = tk.Button(self.file_end, text='退出', command=self.quit, font=('黑体', 20, 'bold'))
         self.file_end_button_return = tk.Button(self.file_end, text='返回主页面', font=('黑体', 10, 'bold'), command=self.return_to_menu)
         self.file_end_button_choose_other = tk.Button(self.file_end, text='进入其他功能区', font=('黑体', 10, 'bold'), command=self.to_other)
@@ -622,14 +638,18 @@ class Filter(Frame):
 
     def txt_register(self):
         self.file_choose_entry.place(x=MID_ENTRY_POS+10, y=10)
-        self.file_choose_sheet_entry.place(x=130, y=55)
+        # self.file_choose_sheet_entry.place(x=130, y=55)
         self.file_re_relist_entry.place(x=MID_ENTRY_POS, y=30)
         self.file_re_choose_pos_row_entry.place(x=200, y=60)
         self.file_re_choose_pos_col_entry.place(x=230, y=60)
-        self.file_filter_quick_filter_entry.place(x=MID_ENTRY_POS, y=30)
+        # self.file_filter_quick_filter_entry.place(x=MID_ENTRY_POS, y=30)
         self.file_filter_quick_filter_row_entry.place(x=150, y=60)
         self.file_filter_quick_filter_col_entry.place(x=180, y=60)
         self.file_result_entry.place(x=50)
+
+    def item_register(self):
+        self.file_choose_sheet_combobox.place(x=130, y=55)
+        self.file_filter_quick_filter_combobox.place(x=MID_ENTRY_POS, y=30)
 
     def button_register(self):
         self.file_choose_button.place(x=BUTTON_RIGHT_MID_LONG_ENTRY, y=10)
@@ -643,16 +663,130 @@ class Filter(Frame):
         self.file_end_button_choose_other.place(x=TO_OTHER, y=10)
         self.file_end_button_return.place(x=RETURN_BUTTON, y=10)
 
+    def get_cols(self):
+        file = pd.read_excel(self.file_path, header=None, sheet_name=self.file_choose_sheet_combobox.get())
+        temp = list(file.iloc[self.file_filter_quick_filter_row_entry_int.get() - 1:, self.file_filter_quick_filter_col_entry_int.get() - 1])
+        _ = []
+        for i in temp:
+            if i in _:
+                continue
+            else:
+                _.append(i)
+        self.file_filter_quick_filter_combobox['value'] = _
+        self.file_filter_quick_filter_combobox.current(0)
+        self.quick_filter_item = _
+        self.reflash_result()
+
+    def reflash_result(self):
+        self.file_result_entry.config(state=tk.NORMAL)
+        self.file_result_entry.delete('1.0', tk.END)
+        for item in self.quick_filter_item:
+            self.file_result_entry.insert(tk.END, str(item) + '\n')
+        self.file_result_entry.config(state=tk.DISABLED)
+
+    def remove(self):
+        self.quick_filter_item.remove(self.file_filter_quick_filter_combobox.get())
+        self.file_filter_quick_filter_combobox['value'] = self.quick_filter_item
+        self.file_filter_quick_filter_combobox.current(0)
+        self.reflash_result()
+
     def read_file(self):
-        self.file_path = filedialog.askopenfilename()
+        try:
+            self.file_path = filedialog.askopenfilename()
+        except FileNotFoundError:
+            return 0
         self.file_choose_entry_string.set(self.file_path)
-        self.file_choose_sheet_entry_string.set('Sheet1')
+        temp = pd.ExcelFile(self.file_path)
+        self.file_choose_sheet_combobox['value'] = temp.sheet_names
+        self.file_choose_sheet_combobox.current(0)
 
     def reset_file(self):
-        self.file = pd.read_excel(self.file_path)
+        self.run()
 
     def clear(self):
         self.file_re_relist_entry_string.set('')
+
+    def run(self):
+        if self.file_re_relist_entry.get() != '' and self.file_filter_quick_filter_combobox_string.get() != '':
+            ask = tk.messagebox.askyesno('兄弟等一下！', message='检测到正则表达式筛选和快速筛选同时被调用，若继续则以正则表达式筛选为准，是否继续？')
+            if ~ask:
+                return 0
+        self.file = pd.read_excel(self.file_path, sheet_name=self.file_choose_sheet_entry_string.get(), header=None)
+        if self.file_re_relist_entry.get() != '':
+            rows_length = self.return_lines(self.file, self.file_re_choose_pos_row_entry_int.get() - 1, self.file_re_choose_pos_col_entry_int.get() - 1)
+            cols_length = self.return_cols(self.file, self.file_re_choose_pos_row_entry_int.get() - 1, self.file_re_choose_pos_col_entry_int.get() - 1)
+            restring = self.file_re_relist_entry.get().split()
+            filter_info = self.re_find(rows_length, cols_length if cols_length <= len(restring) else len(restring), restring)
+            self.print_info(['正则表达式', rows_length, cols_length if cols_length <= len(restring) else len(restring)], filter_info)
+        else:
+            rows_length = self.return_lines(self.file, self.file_filter_quick_filter_row_entry_int.get() - 1, self.file_filter_quick_filter_col_entry_int.get() - 1)
+            cols_length = self.file_filter_quick_filter_col_entry_int.get() - 1
+            header_info = ['快速筛选', rows_length, cols_length]
+            info = self.get_result(rows_length)
+            self.print_info(header_info, info)
+
+    def get_result(self, rows):
+        info = {}
+        cats = self.file_filter_quick_filter_combobox_string.get()
+        for i in range(rows):
+            if self.file.iloc[self.file_filter_quick_filter_row_entry_int.get() - 1 + i, self.file_filter_quick_filter_col_entry_int.get() - 1] == cats:
+                info[i + self.file_filter_quick_filter_row_entry_int.get()] = [self.file_filter_quick_filter_col_entry_int.get(), cats]
+        return info
+
+    def return_lines(self, file, row, col):
+        count = 0
+        try:
+            while True:
+                file.iloc[row + count, col]
+                count += 1
+        except IndexError:
+            return count
+
+    def return_cols(self, file, row, col):
+        count = 0
+        try:
+            while True:
+                file.iloc[row, col + count]
+                count += 1
+        except IndexError:
+            return count
+
+    def re_find(self, rows, nums, restring):
+        """
+        :param rows: 列表行数
+        :param nums: 筛选数量
+        :param restring: 正则表达式(list)
+        :return: 筛选信息
+        """
+        filter_info = {}
+        row_begin = self.file_re_choose_pos_row_entry_int.get() - 1
+        col_begin = self.file_re_choose_pos_col_entry_int.get() - 1
+        for i in range(rows):
+            for j in range(nums):
+                strings = str(self.file.iloc[row_begin + i, col_begin + j])
+                matchobj = re.match(restring[j], strings)
+                if matchobj is None or matchobj.group() != strings:
+                    filter_info[row_begin + i + 1] = [j + col_begin + 1, strings]
+        return filter_info
+
+    def print_info(self, header_info, info):
+        """
+        :param header_info: 为筛选依据信息
+        :param info: 为筛选信息，将会逐条打印(dict)
+        """
+        self.file_result_entry.config(state=tk.NORMAL)
+        self.file_result_entry.delete('1.0', tk.END)
+        self.file_result_entry.insert(tk.END, '目前筛选模式为 ' + str(header_info[0]) + ' 筛选\n')
+        self.file_result_entry.insert(tk.END, '当前sheet为：' + str(self.file_choose_sheet_entry_string.get()) + '\n')
+        self.file_result_entry.insert(tk.END, '筛选行数目：' + str(header_info[1]) + '\n')
+        self.file_result_entry.insert(tk.END, '筛选列数目：' + str(header_info[2]) + '\n')
+        for key in list(info.keys()):
+            self.file_result_entry.insert(tk.END, '————————————————————————————\n')
+            self.file_result_entry.insert(tk.END, '出错行数：' + str(key) + '\n')
+            self.file_result_entry.insert(tk.END, '出错列数：' + str(info[key][0]) + '\n')
+            self.file_result_entry.insert(tk.END, '出错信息：' + str(info[key][1]) + '\n')
+        self.file_result_entry.insert(tk.END, '————————————————————————————\n')
+        self.file_result_entry.config(state=tk.DISABLED)
 
 
 if __name__ == '__main__':
