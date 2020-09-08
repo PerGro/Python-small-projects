@@ -677,7 +677,14 @@ class Filter(Frame):
         self.file_end_button_return.place(x=RETURN_BUTTON, y=10)
 
     def get_cols(self):
-        file = pd.read_excel(self.file_path, header=None, sheet_name=self.file_choose_sheet_combobox.get())
+        try:
+            file = pd.read_excel(self.file_path, header=None, sheet_name=self.file_choose_sheet_combobox.get())
+        except FileNotFoundError:
+            showerror(title='查找出错', message='请确定输入正确文件路径')
+            return 0
+        except ValueError:
+            showerror(title='又又又出错了', message='请确定已输入或选择文件')
+            return 0
         temp = list(file.iloc[self.file_filter_quick_filter_row_entry_int.get() - 1:, self.file_filter_quick_filter_col_entry_int.get() - 1])
         _ = []
         for i in temp:
@@ -698,7 +705,14 @@ class Filter(Frame):
         self.file_result_entry.config(state=tk.DISABLED)
 
     def remove(self):
-        self.quick_filter_item.remove(self.file_filter_quick_filter_combobox.get())
+        try:
+            self.quick_filter_item.remove(self.file_filter_quick_filter_combobox.get())
+        except ValueError:
+            showerror(title='查找出错', message='查找位置超出数据界限')
+            return 0
+        except AttributeError:
+            showerror(title='出错了', message='请先提取，之后进行剔除操作')
+            return 0
         self.file_filter_quick_filter_combobox['value'] = self.quick_filter_item
         self.file_filter_quick_filter_combobox.current(0)
         self.reflash_result()
@@ -707,9 +721,14 @@ class Filter(Frame):
         try:
             self.file_path = filedialog.askopenfilename()
         except FileNotFoundError:
+            showerror(title='请再检查一遍', message='文件不存在')
             return 0
         self.file_choose_entry_string.set(self.file_path)
-        temp = pd.ExcelFile(self.file_path)
+        try:
+            temp = pd.ExcelFile(self.file_path)
+        except FileNotFoundError:
+            showerror(title='心急吃不了热豆腐', message='祖安报错：还没输入文件路径呢，着啥急重新加载啊')
+            return 0
         self.file_choose_sheet_combobox['value'] = temp.sheet_names
         self.file_choose_sheet_combobox.current(0)
 
@@ -721,16 +740,28 @@ class Filter(Frame):
         self.file_re_relist_entry_string.set('')
 
     def run(self):
+        try:
+            self.file = pd.read_excel(self.file_path, sheet_name=self.file_choose_sheet_entry_string.get(), header=None)
+        except ValueError:
+            tk.messagebox.showerror(title='兄弟，出错了', message='文件不存在，请输入正确的文件路径')
+            return 0
         if self.file_re_relist_entry.get() != '' and self.file_filter_quick_filter_combobox_string.get() != '':
             ask = tk.messagebox.askyesno('兄弟等一下！', message='检测到正则表达式筛选和快速筛选同时被调用，若继续则以正则表达式筛选为准，是否继续？')
             if ~ask:
                 return 0
-        self.file = pd.read_excel(self.file_path, sheet_name=self.file_choose_sheet_entry_string.get(), header=None)
         if self.file_re_relist_entry.get() != '':
-            rows_length = self.return_lines(self.file, self.file_re_choose_pos_row_entry_int.get() - 1, self.file_re_choose_pos_col_entry_int.get() - 1)
-            cols_length = self.return_cols(self.file, self.file_re_choose_pos_row_entry_int.get() - 1, self.file_re_choose_pos_col_entry_int.get() - 1)
+            try:
+                rows_length = self.return_lines(self.file, self.file_re_choose_pos_row_entry_int.get() - 1, self.file_re_choose_pos_col_entry_int.get() - 1)
+                cols_length = self.return_cols(self.file, self.file_re_choose_pos_row_entry_int.get() - 1, self.file_re_choose_pos_col_entry_int.get() - 1)
+            except ValueError:
+                showerror(title='查找出错', message='查找位置超出数据界限')
+                return 0
             restring = self.file_re_relist_entry.get().split()
-            filter_info = self.re_find(rows_length, cols_length if cols_length <= len(restring) else len(restring), restring)
+            try:
+                filter_info = self.re_find(rows_length, cols_length if cols_length <= len(restring) else len(restring), restring)
+            except re.error:
+                showerror(title='兄弟，出错了', message='请检查正则表达式是否输入正确')
+                return 0
             self.print_info(['正则表达式', rows_length, cols_length if cols_length <= len(restring) else len(restring)], filter_info)
         else:
             rows_length = self.return_lines(self.file, self.file_filter_quick_filter_row_entry_int.get() - 1, self.file_filter_quick_filter_col_entry_int.get() - 1)
