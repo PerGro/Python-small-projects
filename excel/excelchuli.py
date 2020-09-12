@@ -516,6 +516,18 @@ class PiChuLi(Frame):
         super(PiChuLi, self).frame_init()
 
 
+class TinyWindow:
+    def __init__(self):
+        self.root = tk.Tk()
+        self.root.geometry('270x480')
+        self.root.minsize(width=270, height=480)
+        self.root.maxsize(width=270, height=480)
+        self.main_menu()
+        self.root.mainloop()
+
+    def main_menu(self):
+        pass
+
 class SmallWindow:
     def __init__(self):
         self.root = tk.Tk()
@@ -640,6 +652,7 @@ class Filter(Frame):
         self.file_end_quit_button = tk.Button(self.file_end, text='退出', command=self.quit, font=('黑体', 20, 'bold'))
         self.file_end_button_return = tk.Button(self.file_end, text='返回主页面', font=('黑体', 10, 'bold'), command=self.return_to_menu)
         self.file_end_button_choose_other = tk.Button(self.file_end, text='进入其他功能区', font=('黑体', 10, 'bold'), command=self.to_other)
+        self.file_end_button_help = tk.Button(self.file_end, text='转换器', font=('黑体', 10, 'bold'), command=self.help)
 
     def label_register(self):
         self.file_choose_label.place(x=50, y=5)
@@ -675,6 +688,39 @@ class Filter(Frame):
         self.file_end_quit_button.place(x=QUIT_BUTTON)
         self.file_end_button_choose_other.place(x=TO_OTHER, y=10)
         self.file_end_button_return.place(x=RETURN_BUTTON, y=10)
+        self.file_end_button_help.place(x=600, y=10)
+
+    def help(self):
+        class Help(TinyWindow):
+            def __init__(self):
+                super(Help, self).__init__()
+
+            def main_menu(self):
+                self.int_entry = tk.Entry(self.root, state=tk.NORMAL)
+                self.int_entry.insert(0, '这里是结果')
+                self.string_entry = tk.Entry(self.root)
+                self.string_entry.insert(0, '这里填写要转换的列（大写英文字母）')
+                self.int_entry.config(state=tk.DISABLED)
+
+                self.transport_button = tk.Button(self.root, text='转换', command=self.run)
+                self.quit_button = tk.Button(self.root, text='退出', command=self.quit)
+
+                self.int_entry.pack()
+                self.string_entry.pack()
+                self.transport_button.pack()
+                self.quit_button.pack()
+
+            def run(self):
+                self.int_entry.config(state=tk.NORMAL)
+                self.int_entry.delete(0, tk.END)
+                self.int_entry.insert(0, int(ord(self.string_entry.get())) - 64)
+                self.int_entry.config(state=tk.DISABLED)
+
+            def quit(self):
+                self.root.destroy()
+
+        Help()
+
 
     def get_cols(self):
         try:
@@ -705,6 +751,10 @@ class Filter(Frame):
         self.file_result_entry.config(state=tk.DISABLED)
 
     def remove(self):
+        """
+        对应GUI中剔除的方法
+        :return:
+        """
         try:
             self.quick_filter_item.remove(self.file_filter_quick_filter_combobox.get())
         except ValueError:
@@ -718,6 +768,10 @@ class Filter(Frame):
         self.reflash_result()
 
     def read_file(self):
+        """
+        对应GUI中的浏览按钮
+        :return:
+        """
         try:
             self.file_path = filedialog.askopenfilename()
         except FileNotFoundError:
@@ -737,6 +791,7 @@ class Filter(Frame):
         self.run()
 
     def clear(self):
+        """清除正则表达式一栏的内容"""
         self.file_re_relist_entry_string.set('')
 
     def run(self):
@@ -779,6 +834,7 @@ class Filter(Frame):
         return info
 
     def return_lines(self, file, row, col):
+        """从开始的行列开始，只查找第一列，一直到遇到的第一个无内容单元格为止，返回此时的行数"""
         count = 0
         try:
             while True:
@@ -788,6 +844,7 @@ class Filter(Frame):
             return count
 
     def return_cols(self, file, row, col):
+        """从开始的行列开始，只查找第一行，一直到遇到的第一个无内容单元格为止，返回此时的列数"""
         count = 0
         try:
             while True:
@@ -816,8 +873,8 @@ class Filter(Frame):
 
     def print_info(self, header_info, info):
         """
-        :param header_info: 为筛选依据信息
-        :param info: 为筛选信息，将会逐条打印(dict)
+        :param header_info: 为筛选依据信息，其内容应为[筛选模式, 筛选行数目, 筛选列数目]
+        :param info: 为筛选信息，将会逐条打印(dict)，其内容应为{出错的行数: [出错列数, 出错单元格信息]}
         """
         self.file_result_entry.config(state=tk.NORMAL)
         self.file_result_entry.delete('1.0', tk.END)
