@@ -6,8 +6,11 @@ from tkinter.scrolledtext import ScrolledText
 from tkinter.messagebox import showerror
 import re
 from tkinter import ttk
+import plotly
 
 """本脚本所有输入数字均为真实数字，无需考虑因下标带来的差异"""
+
+"""本脚本所有窗口为固定大小，为了防止出现因缩放问题而引起的widget排版问题"""
 
 LONG_ENTRY = 80
 MID_ENTRY_POS = 100
@@ -17,6 +20,10 @@ RUN_BUTTON = 350
 QUIT_BUTTON = 450
 RETURN_BUTTON = 10
 TO_OTHER = 100
+SMALL_SIZE = 270
+TINY_SIZE = 140
+BIG_WINDOW_WIDTH = 1600
+BIG_WINDOW_HEGHT = 1000
 
 class Frame:
     def __init__(self):
@@ -35,6 +42,7 @@ class Frame:
         self.label_register()
         self.button_register()
         self.item_register()
+        self.menu_init()
         self.loop()
 
     def frame_init(self):
@@ -93,6 +101,10 @@ class Frame:
     def quit(self):
         """用于退出"""
         self.root.destroy()
+
+    def menu_init(self):
+        """负责菜单栏的初始化"""
+        pass
 
 
 class MainMenu(Frame):
@@ -519,11 +531,9 @@ class PiChuLi(Frame):
 class TinyWindow:
     def __init__(self):
         self.root = tk.Tk()
-        self.root.geometry('270x480')
         self.root.minsize(width=270, height=480)
         self.root.maxsize(width=270, height=480)
         self.main_menu()
-        self.root.mainloop()
 
     def main_menu(self):
         pass
@@ -577,7 +587,7 @@ class Filter(Frame):
         self.file_path = None
         self.file = None
         self.quick_filter_item = None
-        super().__init__()
+        super(Filter, self).__init__()
 
 
     def frame_init(self):
@@ -694,6 +704,9 @@ class Filter(Frame):
         class Help(TinyWindow):
             def __init__(self):
                 super(Help, self).__init__()
+                self.root.minsize(width=SMALL_SIZE, height=TINY_SIZE)
+                self.root.maxsize(width=SMALL_SIZE, height=TINY_SIZE)
+                self.root.mainloop()
 
             def main_menu(self):
                 self.int_entry = tk.Entry(self.root, state=tk.NORMAL)
@@ -891,5 +904,90 @@ class Filter(Frame):
         self.file_result_entry.config(state=tk.DISABLED)
 
 
+class ExcelPloty(Frame):
+    def __init__(self):
+        self.file_path = None
+        self.file = None
+        super(ExcelPloty, self).__init__()
+
+    def frame_init(self):
+        self.root.title('表格制作器')
+        self.root.geometry('1600x1000')
+        self.root.minsize(width=BIG_WINDOW_WIDTH, height=BIG_WINDOW_HEGHT)
+        self.root.maxsize(width=BIG_WINDOW_WIDTH, height=BIG_WINDOW_HEGHT)
+
+        self.file_choose = tk.Frame(self.root, width=1580, height=80)
+        self.output = tk.Frame(self.root, width=1580, height=80)
+        self.image_view = tk.Frame(self.root, width=1200, height=790)
+        self.plotly_config = tk.Frame(self.root, width=370, height=500)
+        self.color_config = tk.Frame(self.root, width=370, height=280)
+
+        self.file_choose.place(x=10, y=10)
+        self.output.place(x=10, y=100)
+        self.image_view.place(x=10, y=200)
+        self.plotly_config.place(x=1220, y=200)
+        self.color_config.place(x=1220, y=710)
+        self.frame_test()  # 用来检查各frame之间的位置
+
+    def label_create(self):
+        self.file_choose_label = tk.Label(self.file_choose, text='请选择文件：')
+        self.file_choose_sheet_label = tk.Label(self.file_choose, text='Sheet:')
+
+    def button_create(self):
+        self.file_choose_button = tk.Button(self.file_choose, text='浏览', command=self.file_load)
+
+    def txt_create(self):
+        self.file_choose_file_path_entry = tk.Entry(self.file_choose, width=200, textvariable=self.file_choose_file_path_entry_string)
+
+    def item_create(self):
+        self.file_choose_sheet_combox = ttk.Combobox(self.file_choose, width=SHORT_ENTRY, textvariable=self.file_choose_file_sheet_string)
+
+    def var_init(self):
+        self.file_choose_file_path_entry_string = tk.StringVar()
+        self.file_choose_file_sheet_string = tk.StringVar()
+
+    def frame_test(self):
+        """只是用来在最初阶段查看各框架绝对位置"""
+        self.file_choose.config(bg='green')
+        self.output.config(bg='blue')
+        self.image_view.config(bg='gray')
+        self.plotly_config.config(bg='yellow')
+        self.color_config.config(bg='pink')
+
+    def label_register(self):
+        self.file_choose_label.place(x=10, y=10)
+        self.file_choose_sheet_label.place(x=40, y=50)
+
+    def button_register(self):
+        self.file_choose_button.place(x=1530, y=10)
+
+    def txt_register(self):
+        self.file_choose_file_path_entry.place(x=100, y=10)
+
+    def item_register(self):
+        self.file_choose_sheet_combox.place(x=100, y=50)
+
+    def file_load(self):
+        self.file_path = tk.filedialog.askopenfilename()
+        self.file_choose_file_path_entry_string.set(self.file_path)
+        self.file = pd.ExcelFile(self.file_path)
+        self.file_choose_sheet_combox['value'] = self.file.sheet_names
+        self.file_choose_sheet_combox.current(0)
+
+    def menu_init(self):
+        menu = tk.Menu(self.root)
+        file = tk.Menu(menu, tearoff=False)
+
+        menu.add_cascade(label='文件', menu=file)
+        file.add_command(label='打开', command=self.file_load, accelerator='Ctrl+O')
+        file.add_separator()
+        file.add_command(label='退出', command=self.quit)
+
+        self.root.bind('<Control-o>', lambda event: self.file_load())
+        self.root.bind('<Control-O>', lambda event: self.file_load())
+
+        self.root.config(menu=menu)
+
+
 if __name__ == '__main__':
-    MainMenu()
+    ExcelPloty()
