@@ -7,6 +7,7 @@ from tkinter.messagebox import showerror
 import re
 from tkinter import ttk
 import plotly
+import plotly.express as px
 
 """本脚本所有输入数字均为真实数字，无需考虑因下标带来的差异"""
 
@@ -726,7 +727,8 @@ class Filter(Frame):
             def run(self):
                 self.int_entry.config(state=tk.NORMAL)
                 self.int_entry.delete(0, tk.END)
-                self.int_entry.insert(0, int(ord(self.string_entry.get())) - 64)
+                temp = Solution.transport_to_nums(self.string_entry.get())
+                self.int_entry.insert(0, temp)
                 self.int_entry.config(state=tk.DISABLED)
 
             def quit(self):
@@ -934,13 +936,17 @@ class ExcelPloty(Frame):
         self.file_choose_sheet_label = tk.Label(self.file_choose, text='Sheet:')
         self.output_label = tk.Label(self.output, text='输出目录：')
         self.image_view_label = tk.Label(self.image_view, relief='sunken', width=170, height=46, borderwidth=3, bg='#56595b')
+        self.file_choose_pos_label = tk.Label(self.file_choose, text='请选择开始读取的行和列：')
 
     def button_create(self):
         self.file_choose_button = tk.Button(self.file_choose, text='浏览', command=self.file_load)
         self.output_file_path_button = tk.Button(self.output, text='浏览', command=self.file_output)
+        self.output_run_button = tk.Button(self.output, text='导出')
 
     def txt_create(self):
         self.file_choose_file_path_entry = tk.Entry(self.file_choose, width=200, textvariable=self.file_choose_file_path_entry_string)
+        self.file_choose_pos_row_entry = tk.Entry(self.file_choose, width=3, textvariable=self.file_choose_pos_row_entry_int)
+        self.file_choose_pos_col_entry = tk.Entry(self.file_choose, width=3, textvariable=self.file_choose_pos_col_entry_string)
         self.output_file_path_entry = tk.Entry(self.output, width=200, textvariable=self.output_file_path_entry_string)
 
     def item_create(self):
@@ -948,8 +954,12 @@ class ExcelPloty(Frame):
 
     def var_init(self):
         self.file_choose_file_path_entry_string = tk.StringVar()
+        self.file_choose_pos_row_entry_int = tk.IntVar()
+        self.file_choose_pos_col_entry_string = tk.StringVar()
         self.file_choose_file_sheet_string = tk.StringVar()
         self.output_file_path_entry_string = tk.StringVar()
+
+        self.file_choose_pos_col_entry_string.set('0')
 
     def frame_test(self):
         """只是用来在最初阶段查看各框架绝对位置"""
@@ -964,14 +974,18 @@ class ExcelPloty(Frame):
         self.file_choose_sheet_label.place(x=40, y=50)
         self.output_label.place(x=10, y=10)
         self.image_view_label.place(x=0, y=0)
+        self.file_choose_pos_label.place(x=200, y=50)
 
     def button_register(self):
         self.file_choose_button.place(x=1530, y=10)
         self.output_file_path_button.place(x=1530, y=10)
+        self.output_run_button.place(x=1530, y=50)
 
     def txt_register(self):
         self.file_choose_file_path_entry.place(x=100, y=10)
         self.output_file_path_entry.place(x=100, y=10)
+        self.file_choose_pos_col_entry.place(x=400, y=50)
+        self.file_choose_pos_row_entry.place(x=360, y=50)
 
     def item_register(self):
         self.file_choose_sheet_combox.place(x=100, y=50)
@@ -999,6 +1013,24 @@ class ExcelPloty(Frame):
         self.root.bind('<Control-O>', lambda event: self.file_load())
 
         self.root.config(menu=menu)
+
+
+class Solution:
+    """用于解决一些反复地需要通过简单算法解决的问题"""
+    @staticmethod
+    def transport_to_nums(string):
+        """解决在填表格的列时遇到的用字母表示的问题"""
+        string = string.upper()
+        temp = 0
+        count = 1
+        if len(string) > 1:
+            temp += ord(string[-1]) - 64
+            for s in string[-2::-1]:
+                temp += 26 * count * (ord(s) - 64)
+                count += 1
+        else:
+            temp += ord(string)
+        return temp
 
 
 if __name__ == '__main__':
