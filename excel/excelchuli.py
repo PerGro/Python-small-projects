@@ -932,12 +932,16 @@ class ExcelPloty(Frame):
     def label_create(self):
         self.file_choose_label = tk.Label(self.file_choose, text='请选择文件：')
         self.file_choose_sheet_label = tk.Label(self.file_choose, text='Sheet:')
+        self.output_label = tk.Label(self.output, text='输出目录：')
+        self.image_view_label = tk.Label(self.image_view, relief='sunken', width=170, height=46, borderwidth=3, bg='#56595b')
 
     def button_create(self):
         self.file_choose_button = tk.Button(self.file_choose, text='浏览', command=self.file_load)
+        self.output_file_path_button = tk.Button(self.output, text='浏览', command=self.file_output)
 
     def txt_create(self):
         self.file_choose_file_path_entry = tk.Entry(self.file_choose, width=200, textvariable=self.file_choose_file_path_entry_string)
+        self.output_file_path_entry = tk.Entry(self.output, width=200, textvariable=self.output_file_path_entry_string)
 
     def item_create(self):
         self.file_choose_sheet_combox = ttk.Combobox(self.file_choose, width=SHORT_ENTRY, textvariable=self.file_choose_file_sheet_string)
@@ -945,6 +949,7 @@ class ExcelPloty(Frame):
     def var_init(self):
         self.file_choose_file_path_entry_string = tk.StringVar()
         self.file_choose_file_sheet_string = tk.StringVar()
+        self.output_file_path_entry_string = tk.StringVar()
 
     def frame_test(self):
         """只是用来在最初阶段查看各框架绝对位置"""
@@ -957,12 +962,16 @@ class ExcelPloty(Frame):
     def label_register(self):
         self.file_choose_label.place(x=10, y=10)
         self.file_choose_sheet_label.place(x=40, y=50)
+        self.output_label.place(x=10, y=10)
+        self.image_view_label.place(x=0, y=0)
 
     def button_register(self):
         self.file_choose_button.place(x=1530, y=10)
+        self.output_file_path_button.place(x=1530, y=10)
 
     def txt_register(self):
         self.file_choose_file_path_entry.place(x=100, y=10)
+        self.output_file_path_entry.place(x=100, y=10)
 
     def item_register(self):
         self.file_choose_sheet_combox.place(x=100, y=50)
@@ -973,6 +982,9 @@ class ExcelPloty(Frame):
         self.file = pd.ExcelFile(self.file_path)
         self.file_choose_sheet_combox['value'] = self.file.sheet_names
         self.file_choose_sheet_combox.current(0)
+
+    def file_output(self):
+        pass
 
     def menu_init(self):
         menu = tk.Menu(self.root)
