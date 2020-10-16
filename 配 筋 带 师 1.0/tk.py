@@ -2,22 +2,28 @@ import tkinter as tk
 import interfaces
 from interfaces import *
 from tkinter.messagebox import *
+from tkinter import ttk
+
 
 class BigWindow:
     def __init__(self):
         self.root = tk.Tk()
-        self.root.title = None
         self.root.minsize(width=600, height=400)
         self.frame_create()
         self.frame_register()
         self.label_create()
-        self.label_register()
         self.button_create()
-        self.button_register()
         self.var_create()
-        self.var_register()
         self.entry_create()
         self.entry_register()
+        self.label_register()
+        self.button_register()
+
+    def _name_set(self, name):
+        self.root.title(name)
+
+    def _resize(self, width, height):
+        self.root.minsize(width=width, height=height)
 
     def frame_create(self):
         pass
@@ -107,12 +113,20 @@ class SmallWindowCreator:
             for i in input:
                 i = float(i)
         results = []
+        # results.extend((list(self.function(input))))
         try:
-            results.extend(list(self.function(input)))
+            results.extend(self.function(input))
         except TypeError:
             results.extend([self.function(input)])
+        temp = []
+        for i in results:
+            if isinstance(i, list):
+                for _ in i:
+                    temp.append(_)
+            else:
+                temp.append(i)
         for i, name in enumerate(self.outputnames):
-            res[name] = str(results[i])
+            res[name] = str(temp[i])
         strings = ''
         res_key = list(res.keys())
         res_val = list(res.values())
@@ -177,6 +191,7 @@ class WindowFindJmmj(SmallWindow):
 class DataFind(BigWindow):
     def __init__(self):
         super(DataFind, self).__init__()
+        self._name_set('找参带师')
 
     def frame_create(self):
         self.frame_begin = tk.Frame(self.root, width=600, height=100)
@@ -195,6 +210,7 @@ class DataFind(BigWindow):
         self.button_body_gj_kyqd = tk.Button(self.frame_body, text='普通钢筋抗压强度', command=self.find_gj_kyqd)
         self.button_body_gj_klqd = tk.Button(self.frame_body, text='普通钢筋抗拉强度', command=self.find_gj_klqd)
         self.button_body_syqylxs = tk.Button(self.frame_body, text='混凝土受压区等效应力系数', command=self.find_syqylxs)
+        self.button_body_all = tk.Button(self.frame_body, text='我全都要', command=self.find_all)
         self.button_body_custom1 = tk.Button(self.frame_body, text='自定义1')
         self.button_body_custom2 = tk.Button(self.frame_body, text='自定义2')
         self.button_body_custom3 = tk.Button(self.frame_body, text='自定义3')
@@ -217,6 +233,7 @@ class DataFind(BigWindow):
         self.button_body_gj_kyqd.grid(row=1, column=2, padx=5, pady=5)
         self.button_body_gj_klqd.grid(row=1, column=3, padx=5, pady=5)
         self.button_body_syqylxs.grid(row=2, column=0, padx=5, pady=5)
+        self.button_body_all.grid(row=3, columnspan=4)
         self.button_body_custom1.grid(row=6, column=0, padx=5, pady=5)
         self.button_body_custom2.grid(row=6, column=1, padx=5, pady=5)
         self.button_body_custom3.grid(row=6, column=2, padx=5, pady=5)
@@ -249,6 +266,16 @@ class DataFind(BigWindow):
 
     def find_syqylxs(self):
         SmallWindowCreator('混凝土受压区等效矩形应力系数', interfaces.get_syqylxs_l, 'str', ['α1', '\nβ1'], '混凝土强度等级')
+
+    def find_all(self):
+        SmallWindowCreator('我全都要', interfaces.get_all, 'str',
+                           ['相对受压区高度', '\n界面最大抵抗矩系数',
+                            '\n混凝土抗压强度',
+                            '\n混凝土抗拉强度',
+                            '\n普通钢筋抗压强度为',
+                            '\n普通钢筋抗拉强度为',
+                            '\nα1', '\nβ1'],
+                           '混凝土强度等级', '钢筋强度等级')
 
     def custom_set1(self, title:str, windowsname, func, inputtype, outputs, inputname):
         """
@@ -287,8 +314,96 @@ class DataFind(BigWindow):
             SmallWindowCreator(windowsname, func, inputtype, outputs, inputname)
         self.button_body_custom4.config(command=getfuc)
 
+    def custom_set(self, title, windowsname, func, inputtype, outputs, inputname, index):
+        if index == 1:
+            self.custom_set1(title, windowsname, func, inputtype, outputs, inputname)
+        elif index == 2:
+            self.custom_set2(title, windowsname, func, inputtype, outputs, inputname)
+        elif index == 3:
+            self.custom_set3(title, windowsname, func, inputtype, outputs, inputname)
+        elif index == 4:
+            self.custom_set4(title, windowsname, func, inputtype, outputs, inputname)
+
+
+class MainWindow(BigWindow):
+    def __init__(self):
+        super(MainWindow, self).__init__()
+        self._name_set('主页面')
+
+    def button_create(self):
+        self.root_zj_button = tk.Button(self.root, text='配筋带师', command=self.pj)
+        self.root_zc_button = tk.Button(self.root, text='找参带师', command=self.zc)
+
+    def button_register(self):
+        self.root_zj_button.place(x=50, y=100)
+        self.root_zc_button.place(x=150, y=100)
+
+    def zc(self):
+        d = DataFind()
+        d.run()
+
+    def pj(self):
+        g = GetGangJin()
+        g.run()
+
+
+class GetGangJin(BigWindow):
+    def __init__(self):
+        super(GetGangJin, self).__init__()
+        self._name_set('配筋带师')
+        self._resize(1, 1)
+
+    def frame_create(self):
+        self.begin = tk.Frame(self.root, width=400)
+        self.body = tk.Frame(self.root, width=400)
+
+    def label_create(self):
+        self.label_begin_title = tk.Label(self.begin, text='配筋带师')
+        self.label_body_as = tk.Label(self.body, text='所需钢筋截面面积')
+        self.label_body_pc = tk.Label(self.body, text='容许偏差(%)')
+        self.label_body_nums = tk.Label(self.body, text='最大查找种类')
+        self.label_body_b = tk.Label(self.body, text='等效截面尺寸b')
+        self.label_body_h = tk.Label(self.body, text='等效界面尺寸h')
+
+    def var_create(self):
+        self.entry_body_as_int = tk.IntVar()
+
+    def entry_create(self):
+        self.entry_body_as = tk.Entry(self.body, width=40, textvariable=self.entry_body_as_int)
+        self.entry_body_pc = tk.Entry(self.body, width=5)
+        self.entry_body_nums = tk.Entry(self.body, width=40)
+        self.entry_body_b = tk.Entry(self.body, width=40)
+        self.entry_body_h = tk.Entry(self.body, width=40)
+
+    def button_create(self):
+        self.button_body_find = tk.Button(self.body, text='查询', command=self.find)
+
+    def frame_register(self):
+        self.begin.pack()
+        self.body.pack()
+
+    def label_register(self):
+        self.label_begin_title.pack()
+        self.label_body_as.grid(row=0, column=0, sticky=tk.E, padx=1, pady=1)
+        self.label_body_pc.grid(row=1, column=0, sticky=tk.E, padx=1, pady=1)
+        self.label_body_nums.grid(row=2, column=0, sticky=tk.E, padx=1, pady=1)
+        self.label_body_b.grid(row=3, column=0, sticky=tk.E, padx=1, pady=1)
+        self.label_body_h.grid(row=4, column=0, sticky=tk.E, padx=1, pady=1)
+
+    def button_register(self):
+        self.button_body_find.grid(row=100, columnspan=2)
+
+    def entry_register(self):
+        self.entry_body_as.grid(row=0, column=1)
+        self.entry_body_pc.grid(row=1, column=1)
+        self.entry_body_nums.grid(row=2, column=1)
+        self.entry_body_b.grid(row=3, column=1)
+        self.entry_body_h.grid(row=4, column=1)
+
+    def find(self):
+        pass
 
 
 if __name__ == '__main__':
-    d = DataFind()
+    d = MainWindow()
     d.run()
