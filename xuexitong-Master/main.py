@@ -43,6 +43,7 @@ def init_get(settings):
     while iframes - 1:
         frame = browser.find_elements_by_tag_name('iframe')[tag_index[i]]
         browser.switch_to.frame(frame)
+        iframes -= 1
     objectid = re.findall(patten, browser.page_source)
 
     download_url_str.set('d0.ananas.chaoxing.com/download/' + objectid[tag_index[i]])
